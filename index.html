@@ -32,11 +32,11 @@ header {
     font-weight: 600;
 }
 
-/* CONTENT AREA */
+/* MAIN CONTENT (RESERVES SPACE FOR BUTTONS) */
 #content {
     position: absolute;
     top: 44px;
-    bottom: 64px; /* SPACE FOR BUTTONS */
+    bottom: 72px; /* space for buttons */
     left: 0;
     right: 0;
     display: flex;
@@ -59,13 +59,13 @@ textarea {
     font-size: 14px;
 }
 
-/* BUTTON BAR – FIXED (CRITICAL) */
+/* BUTTON BAR (FIXED, ALWAYS VISIBLE) */
 #buttons {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 64px;
+    height: 72px;
     display: flex;
     gap: 8px;
     padding: 8px;
@@ -79,7 +79,7 @@ button {
     background: #1a1a1a;
     color: #fff;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
 }
@@ -88,7 +88,7 @@ button:active {
     background: #333;
 }
 
-/* LANDSCAPE */
+/* LANDSCAPE = LEFT / RIGHT */
 @media (orientation: landscape) {
     #content {
         flex-direction: row;
@@ -112,13 +112,16 @@ button:active {
 
 <div id="buttons">
     <button onclick="addText()">ADD</button>
+    <button onclick="goAction()">GO</button>
     <button onclick="clearAll()">CLEAR</button>
 </div>
 
 <script>
 const BACKEND = "https://screen-ai-helper-professional.onrender.com";
+
 let collected = "";
 
+/* FETCH OCR */
 async function fetchOCR() {
     try {
         const r = await fetch(BACKEND + "/get-ocr");
@@ -129,6 +132,7 @@ async function fetchOCR() {
     } catch {}
 }
 
+/* ADD SELECTED TEXT */
 function addText() {
     const box = document.getElementById("ocrText");
     const sel = box.value.substring(box.selectionStart, box.selectionEnd);
@@ -138,12 +142,24 @@ function addText() {
     }
 }
 
+/* GO ACTION (FOR AI LATER) */
+function goAction() {
+    if (!collected.trim()) {
+        alert("No text selected");
+        return;
+    }
+    alert("GO clicked.\n\nText ready for AI:\n\n" + collected);
+    // later → send to backend AI
+}
+
+/* CLEAR ALL */
 function clearAll() {
     collected = "";
     document.getElementById("ocrText").value = "";
     document.getElementById("selectedText").value = "";
 }
 
+/* POLLING */
 setInterval(fetchOCR, 1500);
 </script>
 
