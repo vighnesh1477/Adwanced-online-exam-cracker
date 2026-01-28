@@ -6,24 +6,22 @@
 <title>Screen AI Helper</title>
 
 <style>
-/* RESET – no wasted pixels */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* FULL SCREEN */
 html, body {
     width: 100%;
     height: 100%;
     background: #000;
     color: #fff;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: system-ui, sans-serif;
     overflow: hidden;
 }
 
-/* MAIN LAYOUT */
+/* APP ROOT */
 #app {
     width: 100vw;
     height: 100vh;
@@ -33,82 +31,71 @@ html, body {
 
 /* HEADER */
 header {
-    flex: 0 0 auto;
-    text-align: center;
-    padding: 8px;
-    font-size: 16px;
-    font-weight: 600;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #111;
     border-bottom: 1px solid #222;
+    font-weight: 600;
 }
 
-/* CONTENT AREA */
-main {
+/* MAIN CONTENT */
+#content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 6px;
 }
 
-/* TEXT AREAS */
+/* TEXT PANELS */
+.panel {
+    flex: 1;
+    display: flex;
+}
+
 textarea {
     width: 100%;
+    height: 100%;
     resize: none;
     background: #0f0f0f;
     color: #fff;
     border: 1px solid #222;
-    border-radius: 6px;
-    padding: 8px;
+    padding: 10px;
     font-size: 14px;
-    line-height: 1.4;
 }
 
-/* OCR BOX TAKES MORE SPACE */
-#ocrText {
-    flex: 2;
-}
-
-/* SELECTED BOX */
-#selectedText {
-    flex: 1;
-    background: #080808;
-}
-
-/* BUTTON BAR */
+/* BUTTON BAR (ALWAYS VISIBLE) */
 #buttons {
+    height: 56px;
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    padding: 8px;
+    background: #111;
+    border-top: 1px solid #222;
 }
 
-/* BUTTONS */
 button {
     flex: 1;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: 600;
     background: #1a1a1a;
     color: #fff;
     border: none;
     border-radius: 6px;
-    touch-action: manipulation;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 button:active {
     background: #333;
 }
 
-/* LANDSCAPE OPTIMIZATION */
+/* LANDSCAPE MODE */
 @media (orientation: landscape) {
-    main {
+    #content {
         flex-direction: row;
     }
 
-    #left, #right {
+    .panel {
         flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
     }
 }
 </style>
@@ -119,30 +106,26 @@ button:active {
 <div id="app">
     <header>Screen AI Helper</header>
 
-    <main>
-        <!-- PORTRAIT STACK / LANDSCAPE LEFT -->
-        <div id="left">
+    <div id="content">
+        <div class="panel">
             <textarea id="ocrText" placeholder="Waiting for OCR..."></textarea>
-            <div id="buttons">
-                <button onclick="addText()">ADD</button>
-                <button onclick="clearAll()">CLEAR</button>
-            </div>
         </div>
-
-        <!-- LANDSCAPE RIGHT -->
-        <div id="right">
+        <div class="panel">
             <textarea id="selectedText" placeholder="Selected text..." readonly></textarea>
         </div>
-    </main>
+    </div>
+
+    <div id="buttons">
+        <button onclick="addText()">ADD</button>
+        <button onclick="clearAll()">CLEAR</button>
+    </div>
 </div>
 
 <script>
-/* CHANGE THIS TO YOUR RENDER BACKEND */
 const BACKEND = "https://screen-ai-helper-professional.onrender.com";
 
 let collected = "";
 
-/* FETCH OCR CONTINUOUSLY */
 async function fetchOCR() {
     try {
         const res = await fetch(BACKEND + "/get-ocr");
@@ -150,12 +133,9 @@ async function fetchOCR() {
         if (data.ocr_text) {
             document.getElementById("ocrText").value = data.ocr_text;
         }
-    } catch (e) {
-        // silent fail (backend sleeping, network delay)
-    }
+    } catch (e) {}
 }
 
-/* ADD SELECTED TEXT */
 function addText() {
     const box = document.getElementById("ocrText");
     const selected = box.value.substring(
@@ -169,14 +149,12 @@ function addText() {
     }
 }
 
-/* CLEAR EVERYTHING */
 function clearAll() {
     collected = "";
     document.getElementById("ocrText").value = "";
     document.getElementById("selectedText").value = "";
 }
 
-/* POLL BACKEND */
 setInterval(fetchOCR, 1500);
 </script>
 
