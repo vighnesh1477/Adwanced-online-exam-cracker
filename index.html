@@ -14,24 +14,17 @@
 
     h2 {
         text-align: center;
-        margin-bottom: 10px;
     }
 
     textarea {
         width: 100%;
         height: 120px;
         background: #1e1e1e;
-        color: #ffffff;
+        color: white;
         border: 1px solid #444;
         border-radius: 6px;
         padding: 10px;
         margin-bottom: 10px;
-        resize: vertical;
-    }
-
-    .buttons {
-        text-align: center;
-        margin-bottom: 15px;
     }
 
     button {
@@ -47,12 +40,6 @@
     button:hover {
         background: #555;
     }
-
-    .section-title {
-        margin-top: 15px;
-        font-size: 14px;
-        opacity: 0.8;
-    }
 </style>
 </head>
 
@@ -60,78 +47,50 @@
 
 <h2>Screen AI Helper</h2>
 
-<div class="section-title">OCR TEXT</div>
-<textarea id="ocrText" placeholder="OCR text will appear here..."></textarea>
+<h4>OCR TEXT</h4>
+<textarea id="ocrText" placeholder="Waiting for OCR..."></textarea>
 
-<div class="buttons">
-    <button onclick="addText()">ADD</button>
-    <button onclick="askAI()">GO</button>
-    <button onclick="clearAll()">CLEAR</button>
-</div>
+<button onclick="addText()">ADD</button>
+<button onclick="clearAll()">CLEAR</button>
 
-<div class="section-title">SELECTED TEXT</div>
+<h4>SELECTED TEXT</h4>
 <textarea id="selectedText" readonly></textarea>
 
-<div class="section-title">AI ANSWER</div>
-<textarea id="answerBox" readonly></textarea>
-
 <script>
-    let collectedText = "";
+const BACKEND = "https://screen-ai-helper-professional.onrender.com";
 
-    async function fetchOCR() {
-        try {
-            const res = await fetch("http://127.0.0.1:5000/get-ocr");
-            const data = await res.json();
-            document.getElementById("ocrText").value = data.ocr_text || "";
-        } catch (e) {
-            console.log("Backend not reachable");
-        }
-    }
+let collected = "";
 
-    function addText() {
-        const box = document.getElementById("ocrText");
-        const selected = box.value.substring(
-            box.selectionStart,
-            box.selectionEnd
-        );
-
-        if (selected.trim()) {
-            collectedText += selected + "\n\n";
-            document.getElementById("selectedText").value = collectedText;
-        }
-    }
-
-    async function askAI() {
-        if (!collectedText.trim()) {
-            alert("No text selected");
-            return;
-        }
-
-        document.getElementById("answerBox").value = "⏳ Asking AI...";
-
-        await fetch("http://127.0.0.1:5000/select", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ text: collectedText })
-        });
-
-        const res = await fetch("http://127.0.0.1:5000/ask-ai", {
-            method: "POST"
-        });
-
+async function fetchOCR() {
+    try {
+        const res = await fetch(BACKEND + "/get-ocr");
         const data = await res.json();
-        document.getElementById("answerBox").value = data.answer || "No answer";
+        document.getElementById("ocrText").value = data.ocr_text || "";
+    } catch (e) {
+        console.log("Backend not reachable");
     }
+}
 
-    function clearAll() {
-        collectedText = "";
-        document.getElementById("ocrText").value = "";
-        document.getElementById("selectedText").value = "";
-        document.getElementById("answerBox").value = "";
+function addText() {
+    const box = document.getElementById("ocrText");
+    const selected = box.value.substring(
+        box.selectionStart,
+        box.selectionEnd
+    );
+
+    if (selected.trim()) {
+        collected += selected + "\n\n";
+        document.getElementById("selectedText").value = collected;
     }
+}
 
-    // Auto-refresh OCR every 2 seconds
-    setInterval(fetchOCR, 2000);
+function clearAll() {
+    collected = "";
+    document.getElementById("ocrText").value = "";
+    document.getElementById("selectedText").value = "";
+}
+
+setInterval(fetchOCR, 2000);
 </script>
 
 </body>
