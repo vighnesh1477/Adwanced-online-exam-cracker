@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Screen AI Helper</title>
 
 <style>
@@ -21,14 +21,6 @@ html, body {
     overflow: hidden;
 }
 
-/* APP ROOT */
-#app {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
 /* HEADER */
 header {
     height: 44px;
@@ -40,17 +32,20 @@ header {
     font-weight: 600;
 }
 
-/* MAIN CONTENT */
+/* CONTENT AREA */
 #content {
-    flex: 1;
+    position: absolute;
+    top: 44px;
+    bottom: 64px; /* SPACE FOR BUTTONS */
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
 }
 
-/* TEXT PANELS */
+/* PANELS */
 .panel {
     flex: 1;
-    display: flex;
 }
 
 textarea {
@@ -64,14 +59,19 @@ textarea {
     font-size: 14px;
 }
 
-/* BUTTON BAR (ALWAYS VISIBLE) */
+/* BUTTON BAR – FIXED (CRITICAL) */
 #buttons {
-    height: 56px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
     display: flex;
     gap: 8px;
     padding: 8px;
     background: #111;
     border-top: 1px solid #222;
+    z-index: 999;
 }
 
 button {
@@ -88,14 +88,10 @@ button:active {
     background: #333;
 }
 
-/* LANDSCAPE MODE */
+/* LANDSCAPE */
 @media (orientation: landscape) {
     #content {
         flex-direction: row;
-    }
-
-    .panel {
-        flex: 1;
     }
 }
 </style>
@@ -103,48 +99,41 @@ button:active {
 
 <body>
 
-<div id="app">
-    <header>Screen AI Helper</header>
+<header>Screen AI Helper</header>
 
-    <div id="content">
-        <div class="panel">
-            <textarea id="ocrText" placeholder="Waiting for OCR..."></textarea>
-        </div>
-        <div class="panel">
-            <textarea id="selectedText" placeholder="Selected text..." readonly></textarea>
-        </div>
+<div id="content">
+    <div class="panel">
+        <textarea id="ocrText" placeholder="Waiting for OCR..."></textarea>
     </div>
+    <div class="panel">
+        <textarea id="selectedText" placeholder="Selected text..." readonly></textarea>
+    </div>
+</div>
 
-    <div id="buttons">
-        <button onclick="addText()">ADD</button>
-        <button onclick="clearAll()">CLEAR</button>
-    </div>
+<div id="buttons">
+    <button onclick="addText()">ADD</button>
+    <button onclick="clearAll()">CLEAR</button>
 </div>
 
 <script>
 const BACKEND = "https://screen-ai-helper-professional.onrender.com";
-
 let collected = "";
 
 async function fetchOCR() {
     try {
-        const res = await fetch(BACKEND + "/get-ocr");
-        const data = await res.json();
-        if (data.ocr_text) {
-            document.getElementById("ocrText").value = data.ocr_text;
+        const r = await fetch(BACKEND + "/get-ocr");
+        const d = await r.json();
+        if (d.ocr_text) {
+            document.getElementById("ocrText").value = d.ocr_text;
         }
-    } catch (e) {}
+    } catch {}
 }
 
 function addText() {
     const box = document.getElementById("ocrText");
-    const selected = box.value.substring(
-        box.selectionStart,
-        box.selectionEnd
-    );
-
-    if (selected.trim()) {
-        collected += selected + "\n\n";
+    const sel = box.value.substring(box.selectionStart, box.selectionEnd);
+    if (sel.trim()) {
+        collected += sel + "\n\n";
         document.getElementById("selectedText").value = collected;
     }
 }
